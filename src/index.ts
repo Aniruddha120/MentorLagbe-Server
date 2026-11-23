@@ -48,9 +48,22 @@ async function main() {
     res.json({ received: true });
   });
 
-  app.use(express.json({ limit: '2mb' }));
+  app.use(express.json({ limit: '10mb' }));
   app.all('/api/auth/*', toNodeHandler(auth));
   app.get('/', (_req, res) => res.send({ ok: true, name: 'MentorLagbe API' }));
+
+  app.post('/api/upload', verifyToken, async (req: AuthRequest, res) => {
+    const key = process.env.IMGBB_API_KEY;
+    if (!key) return res.status(500).send({ message: 'Image upload not configured' });
+    const image = String(req.body?.image || '');
+    if (!image) return res.status(400).send({ message: 'Image required' });
+    const fd = new FormData();
+    fd.append('image', image.replace(/^data:.*;base64,/, ''));
+    const r = await fetch(`https://api.imgbb.com/1/upload?key=${key}`, { method: 'POST', body: fd });
+    const data: any = await r.json();
+    if (!data.success) return res.status(400).send({ message: data.error?.message || 'Image upload failed' });
+    res.send({ url: data.data.display_url });
+  });
 
   app.post('/api/jwt', async (req, res) => {
     const email = ((req.body?.email as string) || '').toLowerCase();
