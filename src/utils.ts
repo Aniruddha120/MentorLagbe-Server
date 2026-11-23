@@ -8,10 +8,9 @@ export async function ensureUser(usersCol: Collection, email: string, patch: Rec
   const e = (email || '').toLowerCase();
   if (!e) return null;
   const now = new Date();
-  await usersCol.updateOne(
-    { email: e },
-    { $setOnInsert: { email: e, role: 'student', plan: 'free', createdAt: now }, $set: { updatedAt: now, ...patch } },
-    { upsert: true }
-  );
+  const setOnInsert: Record<string, any> = { email: e, role: 'student', plan: 'free', createdAt: now };
+  const set: Record<string, any> = { updatedAt: now, ...patch };
+  for (const k of Object.keys(set)) delete setOnInsert[k];
+  await usersCol.updateOne({ email: e }, { $setOnInsert: setOnInsert, $set: set }, { upsert: true });
   return getUserByEmail(usersCol, e);
 }
