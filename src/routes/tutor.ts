@@ -35,19 +35,19 @@ export default function registerTutor(app: Express, { tuitionsCol, applicationsC
   });
 
   app.patch('/api/tutor/tuitions/:id', verifyToken, verifyTutor, async (req: AuthRequest, res) => {
-    if (!ObjectId.isValid(req.params.id)) return res.status(400).send({ message: 'Invalid id' });
+    if (!ObjectId.isValid(String(req.params.id))) return res.status(400).send({ message: 'Invalid id' });
     const b = req.body || {}; const patch: any = {};
     ['title','subject','classLevel','mode','location','monthlyFee','daysPerWeek','bannerImage','description','isActive'].forEach(k => {
       if (b[k] !== undefined) patch[k] = (k === 'monthlyFee' || k === 'daysPerWeek') ? Number(b[k]) : b[k];
     });
-    const result = await tuitionsCol.updateOne({ _id: new ObjectId(req.params.id), tutorEmail: req.user!.email.toLowerCase() }, { $set: patch });
+    const result = await tuitionsCol.updateOne({ _id: new ObjectId(String(req.params.id)), tutorEmail: req.user!.email.toLowerCase() }, { $set: patch });
     if (!result.matchedCount) return res.status(404).send({ message: 'Not found' });
     res.send({ ok: true });
   });
 
   app.delete('/api/tutor/tuitions/:id', verifyToken, verifyTutor, async (req: AuthRequest, res) => {
-    if (!ObjectId.isValid(req.params.id)) return res.status(400).send({ message: 'Invalid id' });
-    const oid = new ObjectId(req.params.id);
+    if (!ObjectId.isValid(String(req.params.id))) return res.status(400).send({ message: 'Invalid id' });
+    const oid = new ObjectId(String(req.params.id));
     const result = await tuitionsCol.deleteOne({ _id: oid, tutorEmail: req.user!.email.toLowerCase() });
     if (!result.deletedCount) return res.status(404).send({ message: 'Not found' });
     await applicationsCol.deleteMany({ tuitionId: oid });
@@ -61,8 +61,8 @@ export default function registerTutor(app: Express, { tuitionsCol, applicationsC
   app.patch('/api/tutor/applications/:id', verifyToken, verifyTutor, async (req: AuthRequest, res) => {
     const { status } = req.body || {};
     if (!['accepted', 'rejected'].includes(status)) return res.status(400).send({ message: 'Invalid status' });
-    if (!ObjectId.isValid(req.params.id)) return res.status(400).send({ message: 'Invalid id' });
-    const result = await applicationsCol.updateOne({ _id: new ObjectId(req.params.id), tutorEmail: req.user!.email.toLowerCase() }, { $set: { status } });
+    if (!ObjectId.isValid(String(req.params.id))) return res.status(400).send({ message: 'Invalid id' });
+    const result = await applicationsCol.updateOne({ _id: new ObjectId(String(req.params.id)), tutorEmail: req.user!.email.toLowerCase() }, { $set: { status } });
     if (!result.matchedCount) return res.status(404).send({ message: 'Not found' });
     res.send({ ok: true });
   });

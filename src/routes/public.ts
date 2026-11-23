@@ -20,8 +20,8 @@ export default function registerPublic(app: Express, { tuitionsCol, usersCol }: 
   });
 
   app.get('/api/tuitions/:id', async (req, res) => {
-    if (!ObjectId.isValid(req.params.id)) return res.status(400).send({ message: 'Invalid id' });
-    const tuition = await tuitionsCol.findOne({ _id: new ObjectId(req.params.id) });
+    if (!ObjectId.isValid(String(req.params.id))) return res.status(400).send({ message: 'Invalid id' });
+    const tuition = await tuitionsCol.findOne({ _id: new ObjectId(String(req.params.id)) });
     if (!tuition) return res.status(404).send({ message: 'Not found' });
     const tutor = await usersCol.findOne({ email: (tuition.tutorEmail || '').toLowerCase() }, { projection: { name: 1, email: 1, image: 1, bio: 1, plan: 1 } });
     res.send({ ...tuition, tutor });

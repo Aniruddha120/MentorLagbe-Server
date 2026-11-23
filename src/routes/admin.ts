@@ -19,8 +19,8 @@ export default function registerAdmin(app: Express, { usersCol, tuitionsCol, pay
   app.patch('/api/admin/users/:id/role', verifyToken, verifyAdmin, async (req, res) => {
     const { role } = req.body || {};
     if (!['student','tutor','admin'].includes(role)) return res.status(400).send({ message: 'Invalid role' });
-    if (!ObjectId.isValid(req.params.id)) return res.status(400).send({ message: 'Invalid id' });
-    await usersCol.updateOne({ _id: new ObjectId(req.params.id) }, { $set: { role } });
+    if (!ObjectId.isValid(String(req.params.id))) return res.status(400).send({ message: 'Invalid id' });
+    await usersCol.updateOne({ _id: new ObjectId(String(req.params.id)) }, { $set: { role } });
     res.send({ ok: true });
   });
 
@@ -31,8 +31,8 @@ export default function registerAdmin(app: Express, { usersCol, tuitionsCol, pay
   app.patch('/api/admin/tuitions/:id/status', verifyToken, verifyAdmin, async (req, res) => {
     const { approvalStatus } = req.body || {};
     if (!['approved','rejected','pending'].includes(approvalStatus)) return res.status(400).send({ message: 'Invalid status' });
-    if (!ObjectId.isValid(req.params.id)) return res.status(400).send({ message: 'Invalid id' });
-    await tuitionsCol.updateOne({ _id: new ObjectId(req.params.id) }, { $set: { approvalStatus } });
+    if (!ObjectId.isValid(String(req.params.id))) return res.status(400).send({ message: 'Invalid id' });
+    await tuitionsCol.updateOne({ _id: new ObjectId(String(req.params.id)) }, { $set: { approvalStatus } });
     res.send({ ok: true });
   });
 

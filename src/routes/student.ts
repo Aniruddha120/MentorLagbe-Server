@@ -27,8 +27,8 @@ export default function registerStudent(app: Express, { tuitionsCol, application
   });
 
   app.delete('/api/applications/:id', verifyToken, verifyStudent, async (req: AuthRequest, res) => {
-    if (!ObjectId.isValid(req.params.id)) return res.status(400).send({ message: 'Invalid id' });
-    const appDoc: any = await applicationsCol.findOne({ _id: new ObjectId(req.params.id), studentEmail: req.user!.email.toLowerCase() });
+    if (!ObjectId.isValid(String(req.params.id))) return res.status(400).send({ message: 'Invalid id' });
+    const appDoc: any = await applicationsCol.findOne({ _id: new ObjectId(String(req.params.id)), studentEmail: req.user!.email.toLowerCase() });
     if (!appDoc) return res.status(404).send({ message: 'Not found' });
     if (appDoc.status !== 'pending') return res.status(400).send({ message: 'Only pending applications can be cancelled' });
     await applicationsCol.deleteOne({ _id: appDoc._id });
