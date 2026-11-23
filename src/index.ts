@@ -68,6 +68,7 @@ async function main() {
   app.patch('/api/users/me', verifyToken, async (req: AuthRequest, res) => {
     const patch: any = {};
     ['name', 'phone', 'bio', 'image'].forEach(k => { if (req.body?.[k] !== undefined) patch[k] = req.body[k]; });
+    if (req.body?.role && ['student', 'tutor'].includes(req.body.role)) patch.role = req.body.role;
     await usersCol.updateOne({ email: req.user!.email.toLowerCase() }, { $set: patch });
     res.send(await getUserByEmail(usersCol, req.user!.email));
   });
