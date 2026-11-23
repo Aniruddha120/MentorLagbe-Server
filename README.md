@@ -1,24 +1,46 @@
 # MentorLagbe Server
 
-Express + MongoDB + BetterAuth + JWT + Stripe backend for MentorLagbe.
+Express + TypeScript + MongoDB backend for **MentorLagbe**. Handles BetterAuth, JWT role checks, tuition/application/admin APIs, Stripe checkout/webhook, and image upload proxy.
+
+## Live URL
+- Server: https://mentorlagbe-server-66nj.onrender.com
+- Client: https://mentor-lagbe-client-kohl.vercel.app
 
 ## Setup
-1. `cp .env.example .env` and fill values.
-2. `npm install`
-3. `npm run seed` (optional, seeds approved tuitions)
-4. `npm run dev`
+1. `cp .env.example .env`
+2. Fill required env values:
+   - `PORT=5000`
+   - `CLIENT_URL=http://localhost:3001`
+   - `MONGODB_URI=...`
+   - `DB_NAME=mentorlagbe`
+   - `BETTER_AUTH_SECRET=...`
+   - `BETTER_AUTH_URL=http://localhost:5000`
+   - `JWT_SECRET=...`
+   - `STRIPE_SECRET_KEY=...`
+   - `STRIPE_WEBHOOK_SECRET=...`
+   - `IMGBB_API_KEY=...`
+3. `npm install`
+4. `npm run seed` (optional demo tutors/tuitions)
+5. `npm run dev`
 
-## Env
-See `.env.example`. Required: `MONGODB_URI`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `JWT_SECRET`, `CLIENT_URL`. Stripe/ImgBB keys needed for payments/uploads.
+## Scripts
+- `npm run dev` - start dev server with tsx watch
+- `npm run build` - compile TypeScript
+- `npm start` - run compiled server
+- `npm run seed` - seed demo tutors and approved tuitions
 
-## API highlights
-- Auth: `/api/auth/*` (BetterAuth), `/api/jwt`
-- Public: `/api/tuitions`, `/api/tuitions/:id`
-- Student: `/api/applications`, `/api/applications/my`, `/api/student/stats`
-- Tutor: `/api/tutor/*`
-- Admin: `/api/admin/*`
-- Stripe: `/api/create-checkout-session`, `/api/payments/confirm`, `/api/webhook/stripe`
+## API Highlights
+- Auth: `/api/auth/*` (BetterAuth), `POST /api/jwt`
+- Users: `GET/PATCH /api/users/me`
+- Upload: `POST /api/upload` (authenticated, ImgBB proxy)
+- Public: `GET /api/tuitions`, `GET /api/tuitions/:id`
+- Student: `POST /api/applications`, `GET /api/applications/my`, `DELETE /api/applications/:id`, `GET /api/student/stats`
+- Tutor: `/api/tutor/stats`, `/api/tutor/tuitions`, `/api/tutor/applicants`, `/api/tutor/applications/:id`
+- Admin: `/api/admin/stats`, `/api/admin/users`, `/api/admin/users/:id/role`, `/api/admin/tuitions`, `/api/admin/tuitions/:id/status`, `/api/admin/transactions`
+- Payments: `POST /api/create-checkout-session`, `POST /api/payments/confirm`, `POST /api/webhook/stripe`
 
-## Notes
-- Stripe webhook requires raw body; mounted before `express.json()`.
-- Role checks: `verifyToken`, `verifyStudent`, `verifyTutor`, `verifyAdmin`.
+## Security / Notes
+- JWT verification middleware and role middlewares: `verifyStudent`, `verifyTutor`, `verifyAdmin`.
+- Stripe webhook uses raw body and is mounted before `express.json()`.
+- CORS origin is controlled by `CLIENT_URL`.
+- Secrets are loaded from environment variables; do not commit `.env`.
